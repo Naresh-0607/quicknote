@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickNote - Save your thoughts instantly</title>
+  <meta name="description" content="QuickNote is a clean, minimal cloud notepad to capture and view your thoughts instantly.">
+  
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* CSS Variables & Theme Setup */
+    :root {
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-subtle: #94a3b8;
+      --border-color: #e2e8f0;
+      --border-focus: #3b82f6;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-active: #1e40af;
+      --secondary-bg: #f1f5f9;
+      --secondary-hover: #e2e8f0;
+      --secondary-text: #334155;
+      --success-bg: #ecfdf5;
+      --success-border: #a7f3d0;
+      --success-text: #065f46;
+      --error-bg: #fef2f2;
+      --error-border: #fecaca;
+      --error-text: #991b1b;
+      --info-bg: #eff6ff;
+      --info-border: #bfdbfe;
+      --info-text: #1e40af;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --transition: all 0.2s ease-in-out;
+    }
+
+    /* Reset & Base Styles */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 2.5rem 1rem;
+    }
+
+    /* Main Container */
+    .app-container {
+      width: 100%;
+      max-width: 680px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+    }
+
+    header h1 {
+      font-size: 2.25rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    header h1 .logo-icon {
+      font-size: 1.9rem;
+    }
+
+    header p.subtitle {
+      font-size: 1rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+
+    /* Status Notification Banner */
+    #status-banner {
+      display: none;
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-weight: 500;
+      animation: fadeIn 0.25s ease;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    #status-banner.success {
+      display: flex;
+      background-color: var(--success-bg);
+      border: 1px solid var(--success-border);
+      color: var(--success-text);
+    }
+
+    #status-banner.error {
+      display: flex;
+      background-color: var(--error-bg);
+      border: 1px solid var(--error-border);
+      color: var(--error-text);
+    }
+
+    #status-banner.info {
+      display: flex;
+      background-color: var(--info-bg);
+      border: 1px solid var(--info-border);
+      color: var(--info-text);
+    }
+
+    /* Editor Card */
+    .editor-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .textarea-wrapper {
+      position: relative;
+    }
+
+    textarea#note-input {
+      width: 100%;
+      min-height: 150px;
+      padding: 1rem;
+      font-family: inherit;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text-main);
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      resize: vertical;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    textarea#note-input:focus {
+      background-color: #ffffff;
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    textarea#note-input::placeholder {
+      color: var(--text-subtle);
+    }
+
+    /* Actions Bar */
+    .actions-bar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    /* Buttons */
+    button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 0.65rem 1.25rem;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+      user-select: none;
+    }
+
+    button:focus-visible {
+      outline: 2px solid var(--border-focus);
+      outline-offset: 2px;
+    }
+
+    button:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-primary:active:not(:disabled) {
+      background-color: var(--primary-active);
+    }
+
+    .btn-secondary {
+      background-color: var(--secondary-bg);
+      color: var(--secondary-text);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: var(--secondary-hover);
+      color: var(--text-main);
+    }
+
+    /* Saved Notes Section */
+    .notes-section {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .notes-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 0.25rem;
+    }
+
+    .notes-header h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    /* Notes List Container */
+    #notes-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    /* Note Card */
+    .note-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.2rem;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      transition: var(--transition);
+    }
+
+    .note-card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: #cbd5e1;
+    }
+
+    .note-text {
+      font-size: 0.95rem;
+      color: var(--text-main);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .note-footer {
+      display: flex;
+      align-items: center;
+      font-size: 0.8rem;
+      color: var(--text-subtle);
+      border-top: 1px solid #f1f5f9;
+      padding-top: 0.5rem;
+    }
+
+    /* State Indicators (Loading, Empty, Notice) */
+    .state-message {
+      text-align: center;
+      padding: 2.5rem 1rem;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      background: var(--card-bg);
+      border: 1px dashed var(--border-color);
+      border-radius: var(--radius-md);
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 1rem;
+      height: 1rem;
+      border: 2px solid rgba(0, 0, 0, 0.1);
+      border-top-color: currentColor;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 480px) {
+      body {
+        padding: 1.5rem 0.75rem;
+      }
+
+      .actions-bar {
+        flex-direction: column;
+      }
+
+      .actions-bar button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <main class="app-container">
+    <!-- Header -->
+    <header>
+      <h1><span class="logo-icon">&#9998;</span>QuickNote</h1>
+      <p class="subtitle">Save your thoughts instantly</p>
+    </header>
+
+    <!-- Global Feedback / Alert Banner -->
+    <div id="status-banner" role="alert" aria-live="polite"></div>
+
+    <!-- Note Editor Form -->
+    <section class="editor-card" aria-label="Note Editor">
+      <div class="textarea-wrapper">
+        <textarea
+          id="note-input"
+          placeholder="Type or paste your note here..."
+          aria-label="Note content"
+        ></textarea>
+      </div>
+
+      <div class="actions-bar">
+        <button type="button" id="refresh-btn" class="btn-secondary" onclick="loadNotes()">
+          &#8635; Refresh Notes
+        </button>
+        <button type="button" id="save-btn" class="btn-primary" onclick="saveNote()">
+          Save Note
+        </button>
+      </div>
+    </section>
+
+    <!-- Saved Notes Section -->
+    <section class="notes-section" aria-label="Saved Notes List">
+      <div class="notes-header">
+        <h2>Saved Notes</h2>
+      </div>
+
+      <!-- Dynamic Notes List Container -->
+      <div id="notes-list">
+        <!-- Rendered dynamically by JavaScript -->
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // =========================================================================
+    // API Configuration
+    // Replace "YOUR_API_GATEWAY_URL" with your actual AWS API Gateway endpoint URL
+    // =========================================================================
+    const API_URL = "YOUR_API_GATEWAY_URL";
+
+    // DOM Elements
+    const noteInput = document.getElementById("note-input");
+    const saveBtn = document.getElementById("save-btn");
+    const refreshBtn = document.getElementById("refresh-btn");
+    const notesList = document.getElementById("notes-list");
+    const statusBanner = document.getElementById("status-banner");
+
+    let bannerTimeoutId = null;
+
+    /**
+     * Escape special HTML characters to prevent XSS (Cross-Site Scripting)
+     * @param {string} str - Raw input string
+     * @returns {string} Sanitized string safe for display
+     */
+    function escapeHTML(str) {
+      if (!str) return "";
+      const div = document.createElement("div");
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    /**
+     * Display a temporary feedback message to the user
+     * @param {string} message - Message text to display
+     * @param {"success" | "error" | "info"} type - Type of banner notification
+     * @param {number} [duration=4000] - Duration in milliseconds before fading out
+     */
+    function showMessage(message, type = "info", duration = 4000) {
+      if (!statusBanner) return;
+
+      // Clear any pending dismissal timer
+      if (bannerTimeoutId) {
+        clearTimeout(bannerTimeoutId);
+      }
+
+      statusBanner.className = type;
+      statusBanner.textContent = message;
+
+      if (duration > 0) {
+        bannerTimeoutId = setTimeout(() => {
+          statusBanner.className = "";
+          statusBanner.textContent = "";
+        }, duration);
+      }
+    }
+
+    /**
+     * Save a new note by sending a POST request to the REST API
+     */
+    async function saveNote() {
+      const noteText = noteInput.value.trim();
+
+      // Prevent saving empty notes
+      if (!noteText) {
+        showMessage("Please enter some text before saving.", "error");
+        noteInput.focus();
+        return;
+      }
+
+      // Check if API_URL has been configured
+      if (!API_URL || API_URL === "YOUR_API_GATEWAY_URL") {
+        showMessage("Please configure your API_URL at the top of the script.", "error", 6000);
+        return;
+      }
+
+      // Disable button and indicate saving state
+      saveBtn.disabled = true;
+      const originalBtnText = saveBtn.innerHTML;
+      saveBtn.innerHTML = '<span class="spinner"></span> Saving...';
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ text: noteText })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Server returned status ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        // Clear textarea after successful save
+        noteInput.value = "";
+
+        // Notify user of success
+        const successMsg = data && data.message ? data.message : "Note saved successfully";
+        showMessage(successMsg, "success");
+
+        // Automatically reload notes list to reflect the new note
+        await loadNotes();
+      } catch (error) {
+        console.error("Error saving note:", error);
+        showMessage(`Failed to save note: ${error.message}`, "error");
+      } finally {
+        // Re-enable the button and restore original text
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = originalBtnText;
+      }
+    }
+
+    /**
+     * Load all saved notes by sending a GET request to the REST API
+     */
+    async function loadNotes() {
+      // Check if API_URL has been configured
+      if (!API_URL || API_URL === "YOUR_API_GATEWAY_URL") {
+        notesList.innerHTML = `
+          <div class="state-message">
+            API_URL is set to placeholder. Configure <code>API_URL</code> in <code>index.html</code> to load and save notes from AWS API Gateway.
+          </div>
+        `;
+        return;
+      }
+
+      // Display loading state
+      notesList.innerHTML = `
+        <div class="state-message">
+          <span class="spinner"></span> Loading notes...
+        </div>
+      `;
+
+      refreshBtn.disabled = true;
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "GET"
+        });
+
+        if (!response.ok) {
+          throw new Error(`Server returned status ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        // Clear current notes container
+        notesList.innerHTML = "";
+
+        // Validate notes array
+        const notes = Array.isArray(data.notes) ? data.notes : [];
+
+        // Check if there are no notes
+        if (notes.length === 0) {
+          notesList.innerHTML = '<div class="state-message">No notes saved yet.</div>';
+          return;
+        }
+
+        // Render each note safely using DOM methods & textContent
+        notes.forEach((note) => {
+          const card = document.createElement("div");
+          card.className = "note-card";
+          if (note.id) {
+            card.setAttribute("data-id", String(note.id));
+          }
+
+          const textEl = document.createElement("p");
+          textEl.className = "note-text";
+          textEl.textContent = note.text || "";
+
+          const footerEl = document.createElement("div");
+          footerEl.className = "note-footer";
+
+          // Format timestamp into readable local date/time
+          let formattedDate = "Unknown date";
+          if (note.created_at) {
+            const parsedDate = new Date(note.created_at);
+            formattedDate = isNaN(parsedDate.getTime())
+              ? String(note.created_at)
+              : parsedDate.toLocaleString();
+          }
+          footerEl.textContent = formattedDate;
+
+          card.appendChild(textEl);
+          card.appendChild(footerEl);
+          notesList.appendChild(card);
+        });
+      } catch (error) {
+        console.error("Error loading notes:", error);
+        notesList.innerHTML = `
+          <div class="state-message" style="color: var(--error-text);">
+            Failed to load notes: ${escapeHTML(error.message)}
+          </div>
+        `;
+        showMessage(`Failed to load notes: ${error.message}`, "error");
+      } finally {
+        refreshBtn.disabled = false;
+      }
+    }
+
+    // Load notes when the page is first loaded
+    document.addEventListener("DOMContentLoaded", () => {
+      loadNotes();
+    });
+  </script>
+</body>
+</html>
