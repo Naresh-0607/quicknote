@@ -70,19 +70,21 @@
     /* Main Container */
     .app-container {
       width: 100%;
-      max-width: 680px;
+      max-width: 1140px;
       display: flex;
       flex-direction: column;
       gap: 1.75rem;
+      margin: 0 auto;
     }
 
     /* Header */
     header {
       text-align: center;
+      padding-bottom: 0.5rem;
     }
 
     header h1 {
-      font-size: 2.25rem;
+      font-size: 2.35rem;
       font-weight: 700;
       letter-spacing: -0.03em;
       color: var(--text-main);
@@ -93,7 +95,7 @@
     }
 
     header h1 .logo-icon {
-      font-size: 1.9rem;
+      font-size: 2rem;
     }
 
     header p.subtitle {
@@ -136,7 +138,20 @@
       color: var(--info-text);
     }
 
-    /* Editor Card */
+    /* Two-Column Dashboard Grid: Left = Notes List, Right = Editor */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+      gap: 2rem;
+      align-items: start;
+    }
+
+    /* Right Column: Note Editor */
+    .editor-column {
+      position: sticky;
+      top: 1.75rem;
+    }
+
     .editor-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -146,19 +161,45 @@
       display: flex;
       flex-direction: column;
       gap: 1rem;
+      transition: var(--transition);
+    }
+
+    .editor-card:hover {
+      box-shadow: var(--shadow-md);
+    }
+
+    .editor-header h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main);
     }
 
     .textarea-wrapper {
       position: relative;
     }
 
-    textarea#note-input,
-    textarea.card-edit-textarea {
+    textarea#note-input {
       width: 100%;
-      min-height: 140px;
+      min-height: 220px;
       padding: 1rem;
       font-family: inherit;
       font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text-main);
+      background-color: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      resize: vertical;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    textarea.card-edit-textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 0.85rem;
+      font-family: inherit;
+      font-size: 0.92rem;
       line-height: 1.6;
       color: var(--text-main);
       background-color: var(--bg-color);
@@ -406,6 +447,17 @@
     }
 
     /* Responsive Adjustments */
+    @media (max-width: 860px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 1.75rem;
+      }
+
+      .editor-column {
+        position: static;
+      }
+    }
+
     @media (max-width: 480px) {
       body {
         padding: 1.5rem 0.75rem;
@@ -443,37 +495,46 @@
     <!-- Global Feedback / Alert Banner -->
     <div id="status-banner" role="alert" aria-live="polite"></div>
 
-    <!-- Note Editor Form -->
-    <section class="editor-card" aria-label="Note Editor">
-      <div class="textarea-wrapper">
-        <textarea
-          id="note-input"
-          placeholder="Type or paste your note here..."
-          aria-label="Note content"
-        ></textarea>
-      </div>
+    <!-- Main Two-Column Layout: Left = Notes List, Right = Text Area Editor -->
+    <div class="dashboard-grid">
+      <!-- Left Column: All Quick Notes Listed -->
+      <section class="notes-section" aria-label="Saved Notes List">
+        <div class="notes-header">
+          <h2>Saved Notes</h2>
+          <button type="button" id="refresh-btn" class="btn-secondary" onclick="loadNotes()">
+            &#8635; Refresh Notes
+          </button>
+        </div>
 
-      <div class="actions-bar">
-        <button type="button" id="refresh-btn" class="btn-secondary" onclick="loadNotes()">
-          &#8635; Refresh Notes
-        </button>
-        <button type="button" id="save-btn" class="btn-primary" onclick="saveNote()">
-          Save Note
-        </button>
-      </div>
-    </section>
+        <!-- Dynamic Notes List Container -->
+        <div id="notes-list">
+          <!-- Rendered dynamically by JavaScript -->
+        </div>
+      </section>
 
-    <!-- Saved Notes Section -->
-    <section class="notes-section" aria-label="Saved Notes List">
-      <div class="notes-header">
-        <h2>Saved Notes</h2>
-      </div>
+      <!-- Right Column: Note Editor Text Field -->
+      <aside class="editor-column" aria-label="Note Editor Column">
+        <section class="editor-card" aria-label="Note Editor">
+          <div class="editor-header">
+            <h2>New Note</h2>
+          </div>
 
-      <!-- Dynamic Notes List Container -->
-      <div id="notes-list">
-        <!-- Rendered dynamically by JavaScript -->
-      </div>
-    </section>
+          <div class="textarea-wrapper">
+            <textarea
+              id="note-input"
+              placeholder="Type or paste your note here..."
+              aria-label="Note content"
+            ></textarea>
+          </div>
+
+          <div class="actions-bar">
+            <button type="button" id="save-btn" class="btn-primary" onclick="saveNote()">
+              Save Note
+            </button>
+          </div>
+        </section>
+      </aside>
+    </div>
   </main>
 
   <script>
